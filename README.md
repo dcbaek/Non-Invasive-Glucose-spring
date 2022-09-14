@@ -8,15 +8,8 @@
 
 <br>
 
-## 사용 기술
-
-## ERD
-
 ## 저장소
 * [백엔드 저장소 (현재 저장소)](https://github.com/dcbaek/Non-Invasive-Glucose-spring)
 * [프론트엔드 저장소](https://github.com/Gunwooooo/Non-Invasive-Glucose-android)
 <br>
-
-## 프로젝트 이슈 정리
-
 
