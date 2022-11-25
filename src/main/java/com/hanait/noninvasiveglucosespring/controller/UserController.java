@@ -52,7 +52,7 @@ public class UserController {
     }
 
     // 어드민이 접근 가능
-    @GetMapping("/admin/users")
+    @PostMapping("/admin/users")
     public List<User> users(){
         return userRepository.findAll();
     }
