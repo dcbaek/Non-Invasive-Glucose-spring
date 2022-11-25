@@ -51,7 +51,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         // 유저네임패스워드 토큰 생성
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(
-                        loginRequestDto.getUsername(),
+                        loginRequestDto.getPhoneNumber(),
                         loginRequestDto.getPassword());
 
         log.info("JwtAuthenticationFilter : 토큰생성완료");
@@ -69,7 +69,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 authenticationManager.authenticate(authenticationToken);
 
         PrincipalDetails principalDetailis = (PrincipalDetails) authentication.getPrincipal();
-        log.info("Authentication = {} ", principalDetailis.getUser().getUsername());
+        log.info("Authentication = {} ", principalDetailis.getUser().getPhoneNumber());
         return authentication;
     }
 
@@ -84,7 +84,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .withSubject(principalDetailis.getUsername())
                 .withExpiresAt(new Date(System.currentTimeMillis()+JwtProperties.EXPIRATION_TIME))
                 .withClaim("id", principalDetailis.getUser().getId())
-                .withClaim("username", principalDetailis.getUser().getUsername())
+                .withClaim("phoneNumber", principalDetailis.getUser().getPhoneNumber())
                 .sign(Algorithm.HMAC512(JwtProperties.SECRET));
 
         response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX+jwtToken);
