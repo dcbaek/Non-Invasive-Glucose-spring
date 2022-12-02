@@ -96,8 +96,6 @@ public class UserController {
             // 회원 가입 페이지로 다시 리턴
             return "/home";
         }
-        // 중복검사
-        //userService.checkUsernameDuplication(user);
 
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         user.setRoles("ROLE_USER");
@@ -106,17 +104,6 @@ public class UserController {
 
         return "회원가입완료";
     }
-
-    /* 아이디, 닉네임, 이메일 중복 체크 */
-//    @GetMapping("/auth/{phoneNumber}/exists")
-//    public ResponseEntity<Boolean> checkUsernameDuplicate(@PathVariable String phoneNumber){
-//        return ResponseEntity.ok(userService.checkUsernameDuplication(phoneNumber));
-//    }
-//
-//    @GetMapping("/auth/joinProc/{nickname}/exists")
-//    public ResponseEntity<Boolean> checkNicknameDuplicate(@PathVariable String nickname){
-//        return ResponseEntity.ok(userService.checkUsernameDuplication(nickname));
-//    }
 
     @PostMapping("/check")
     public String findPhoneNumber(@Validated @RequestBody User user, Model model, BindingResult bindingResult, HttpServletResponse response) {
@@ -128,6 +115,7 @@ public class UserController {
 
         if (bindingResult.hasErrors()) {
             // 회원 가입 실패시 입력 데이터 값을 유지
+            log.info("phoneNumber={}", user.getPhoneNumber());
             model.addAttribute("user", user);
 
             // 유효서 통과 못한 필드와 메시지를 핸들링
@@ -141,7 +129,7 @@ public class UserController {
             return "/check";
         }
         userRepository.findByPhoneNumber(user.getPhoneNumber());
-
+        log.info("phoneNumber2={}", user.getPhoneNumber());
 
         return "사용 가능한 번호 입니다.";
     }

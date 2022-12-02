@@ -87,6 +87,12 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .withClaim("phoneNumber", principalDetailis.getUser().getPhoneNumber())
                 .sign(Algorithm.HMAC512(JwtProperties.SECRET));
 
+        String refreshToken = JWT.create()
+                        .withSubject(principalDetailis.getUsername())
+                        .withExpiresAt(new Date(System.currentTimeMillis()+JwtProperties.EXPIRATION_TIME))
+                        .withIssuedAt(new Date(System.currentTimeMillis()))
+                        .sign(Algorithm.HMAC512(JwtProperties.SECRET));
+
         response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX+jwtToken);
         //새롭게추가
         response.setHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX+jwtToken);
