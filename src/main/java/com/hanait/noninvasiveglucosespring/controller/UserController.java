@@ -1,20 +1,17 @@
 package com.hanait.noninvasiveglucosespring.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.hanait.noninvasiveglucosespring.config.auth.PrincipalDetails;
-import com.hanait.noninvasiveglucosespring.dto.LoginRequestDto;
 import com.hanait.noninvasiveglucosespring.model.User;
 import com.hanait.noninvasiveglucosespring.repository.UserRepository;
 import com.hanait.noninvasiveglucosespring.service.UserService;
 import com.hanait.noninvasiveglucosespring.validator.CheckUsernameValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
@@ -22,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,14 +53,16 @@ public class UserController {
     // 왜냐하면 @AuthenticationPrincipal은 UserDetailsService에서 리턴될 때 만들어지기 때문이다.
 
     // 유저 혹은 매니저 혹은 어드민이 접근 가능
-    @PostMapping("/user")
-    public String user(Authentication authentication) {
+    @PostMapping("/userinfo")
+    public Authentication userShow(User user, Authentication authentication, HttpServletResponse response) {
         PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
-        System.out.println("principal : "+principal.getUser().getId());
-        System.out.println("principal : "+principal.getUser().getPhoneNumber());
-        System.out.println("principal : "+principal.getUser().getPassword());
 
-        return "user";
+        log.info("Authentication authentication info : {}", authentication);
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding("utf-8");
+
+        return authentication;
     }
 
     // 매니저 혹은 어드민이 접근 가능
@@ -132,6 +130,13 @@ public class UserController {
         log.info("phoneNumber2={}", user.getPhoneNumber());
 
         return "사용 가능한 번호 입니다.";
+    }
+
+    @PostMapping("/edit")
+    public String edit() {
+
+        //userRepository.updateParam();
+        return "수정되었습니다.";
     }
 
 }

@@ -1,14 +1,11 @@
 package com.hanait.noninvasiveglucosespring.service;
 
+import com.hanait.noninvasiveglucosespring.model.User;
 import com.hanait.noninvasiveglucosespring.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.Errors;
-import org.springframework.validation.FieldError;
 
-import java.util.HashMap;
-import java.util.Map;
 @Slf4j
 @Service
 public class UserService {
@@ -19,6 +16,11 @@ public class UserService {
     @Transactional(readOnly = true)
     public boolean checkUsernameDuplication(String phoneNumber) {
         return userRepository.existsByPhoneNumber(phoneNumber);
+    }
+
+    @Transactional(readOnly = true)
+    public User getUserInfo(String phoneNumber) {
+        return userRepository.findByPhoneNumber(phoneNumber);
     }
 
 }
