@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.sql.RowSet;
 import javax.validation.constraints.NotBlank;
 
 @Data
@@ -29,7 +28,4 @@ public class LoginRequestDto {
     @NotBlank(message = "성별은 필수 입력 값입니다.")
     private String sex;
 
-    public RowSet toEntity() {
-        return null;
-    }
 }

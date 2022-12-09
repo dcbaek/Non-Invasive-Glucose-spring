@@ -2,12 +2,14 @@ package com.hanait.noninvasiveglucosespring.controller;
 
 
 import com.hanait.noninvasiveglucosespring.config.auth.PrincipalDetails;
+import com.hanait.noninvasiveglucosespring.dto.LoginRequestDto;
 import com.hanait.noninvasiveglucosespring.model.User;
 import com.hanait.noninvasiveglucosespring.repository.UserRepository;
 import com.hanait.noninvasiveglucosespring.service.UserService;
 import com.hanait.noninvasiveglucosespring.validator.CheckUsernameValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.ui.Model;
@@ -22,10 +24,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/wellink")
 @RequiredArgsConstructor
 // @CrossOrigin  // CORS 허용
 public class UserController {
@@ -53,11 +56,11 @@ public class UserController {
     // 왜냐하면 @AuthenticationPrincipal은 UserDetailsService에서 리턴될 때 만들어지기 때문이다.
 
     // 유저 혹은 매니저 혹은 어드민이 접근 가능
-    @PostMapping("/userinfo")
-    public Authentication userShow(User user, Authentication authentication, HttpServletResponse response) {
+    @PostMapping("/user/info")
+    public Authentication infoUser(User user, LoginRequestDto dto, Authentication authentication, HttpServletResponse response) {
         PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
 
-        log.info("Authentication authentication info : {}", authentication);
+        log.info("Authentication info = {}", authentication);
 
         response.setContentType("application/json");
         response.setCharacterEncoding("utf-8");
@@ -77,8 +80,8 @@ public class UserController {
         return userRepository.findAll();
     }
 
-    @PostMapping("/join")
-    public String join(@Validated @RequestBody User user, BindingResult bindingResult, Model model, HttpServletResponse response) {
+    @PostMapping("/user/join")
+    public String joinUser(@Validated @RequestBody User user, BindingResult bindingResult, Model model, HttpServletResponse response) {
 
         if (bindingResult.hasErrors()) {
             // 회원 가입 실패시 입력 데이터 값을 유지
@@ -103,10 +106,15 @@ public class UserController {
         return "회원가입완료";
     }
 
-    @PostMapping("/check")
-    public String findPhoneNumber(@Validated @RequestBody User user, Model model, BindingResult bindingResult, HttpServletResponse response) {
+    @PostMapping("/user/check")
+    public String findPhoneNumber(@Validated @RequestBody User user, Model model,
+                                  BindingResult bindingResult, HttpServletResponse response) {
+
+        LoginRequestDto dto = new LoginRequestDto();
 
         log.info("phoneNumber={}", user.getPhoneNumber());
+        log.info("User={}", user);
+        log.info("dto={}", dto);
 
         response.setContentType("application/json");
         response.setCharacterEncoding("utf-8");
@@ -124,7 +132,7 @@ public class UserController {
                 log.info("Error message : {}", error.getDefaultMessage());
             }
             // 회원 가입 페이지로 다시 리턴
-            return "/check";
+            return "/user/check";
         }
         userRepository.findByPhoneNumber(user.getPhoneNumber());
         log.info("phoneNumber2={}", user.getPhoneNumber());
@@ -132,11 +140,28 @@ public class UserController {
         return "사용 가능한 번호 입니다.";
     }
 
-    @PostMapping("/edit")
-    public String edit() {
+    @PutMapping("/user/edit")
+    public Optional<User> editUser(@RequestParam String phoneNumber, @RequestBody User user) {
 
-        //userRepository.updateParam();
-        return "수정되었습니다.";
+        Optional<User> updateUser = Optional.ofNullable(userRepository.findByPhoneNumber(phoneNumber));
+
+        log.info("updateUser = {}", updateUser);
+
+        updateUser.ifPresent(selectUser -> {
+            selectUser.setNickname(user.getNickname());
+            selectUser.setBirthDay(user.getBirthDay());
+            selectUser.setSex(user.getSex());
+
+            userRepository.save(selectUser);
+        });
+
+        return updateUser;
+    }
+
+    @DeleteMapping("/user/delete/{phoneNumber}")
+    public void deleteUser(@PathVariable("phoneNumber") String phoneNumber) {
+
+        userService.delete(phoneNumber);
     }
 
 }
