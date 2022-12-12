@@ -1,5 +1,6 @@
 package com.hanait.noninvasiveglucosespring.service;
 
+import com.hanait.noninvasiveglucosespring.dto.LoginRequestDto;
 import com.hanait.noninvasiveglucosespring.dto.UserResponseDto;
 import com.hanait.noninvasiveglucosespring.model.User;
 import com.hanait.noninvasiveglucosespring.repository.UserRepository;
@@ -26,12 +27,11 @@ public class UserService {
     }
 
     //https://binco.tistory.com/entry/SpringBoot-JPA-%EA%B2%8C%EC%8B%9C%ED%8C%90-CRUD-%EA%B5%AC%ED%98%84Read
-    public UserResponseDto userinfo(Long id) {
+    public LoginRequestDto userinfo(String phoneNumber) {
 
-        User user = userRepository.findById(id)
-                .orElseThrow(IllegalAccessError::new);
+        User user = userRepository.findByPhoneNumber(phoneNumber);
 
-        return UserResponseDto.builder()
+        return LoginRequestDto.builder()
                 .id(user.getId())
                 .phoneNumber(user.getPhoneNumber())
                 .nickname(user.getNickname())
@@ -39,7 +39,6 @@ public class UserService {
                 .sex(user.getSex())
                 .build();
     }
-
 
     @Transactional
     public void delete(String phoneNumber) {

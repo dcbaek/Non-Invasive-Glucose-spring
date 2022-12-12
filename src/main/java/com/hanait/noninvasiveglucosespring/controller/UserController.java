@@ -57,7 +57,7 @@ public class UserController {
 
     // 유저 혹은 매니저 혹은 어드민이 접근 가능
     @PostMapping("/user/info")
-    public Authentication infoUser(User user, LoginRequestDto dto, Authentication authentication, HttpServletResponse response) {
+    public Authentication infoUser(User user, Authentication authentication, HttpServletResponse response) {
         PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
 
         log.info("Authentication info = {}", authentication);
