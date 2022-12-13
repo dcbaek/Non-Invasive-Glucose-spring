@@ -43,6 +43,7 @@ public class UserService {
     @Transactional
     public void delete(String phoneNumber) {
 
+        log.info("delete phoneNumer = {}", phoneNumber);
         User user = userRepository.findByPhoneNumber(phoneNumber);
         userRepository.delete(user);
 

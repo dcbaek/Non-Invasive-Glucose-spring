@@ -2,12 +2,12 @@ package com.hanait.noninvasiveglucosespring.config.jwt;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hanait.noninvasiveglucosespring.config.auth.PrincipalDetails;
 import com.hanait.noninvasiveglucosespring.dto.LoginRequestDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -97,6 +97,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX+jwtToken);
         //새롭게추가
         response.setHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX+jwtToken);
+
     }
 
 

@@ -1,7 +1,10 @@
 package com.hanait.noninvasiveglucosespring.controller;
 
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.hanait.noninvasiveglucosespring.config.auth.PrincipalDetails;
+import com.hanait.noninvasiveglucosespring.config.jwt.JwtProperties;
 import com.hanait.noninvasiveglucosespring.dto.LoginRequestDto;
 import com.hanait.noninvasiveglucosespring.model.User;
 import com.hanait.noninvasiveglucosespring.repository.UserRepository;
@@ -9,7 +12,6 @@ import com.hanait.noninvasiveglucosespring.service.UserService;
 import com.hanait.noninvasiveglucosespring.validator.CheckUsernameValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.ui.Model;
@@ -19,12 +21,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @RestController
@@ -57,7 +55,7 @@ public class UserController {
 
     // 유저 혹은 매니저 혹은 어드민이 접근 가능
     @PostMapping("/user/info")
-    public Authentication infoUser(User user, Authentication authentication, HttpServletResponse response) {
+    public Authentication infoUser(User user, LoginRequestDto dto, Authentication authentication, HttpServletResponse response) {
         PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
 
         log.info("Authentication info = {}", authentication);
@@ -158,10 +156,22 @@ public class UserController {
         return updateUser;
     }
 
-    @DeleteMapping("/user/delete/{phoneNumber}")
-    public void deleteUser(@PathVariable("phoneNumber") String phoneNumber) {
+    @PostMapping("/user/delete")
+    public String deleteUser(@RequestHeader("Authorization") String auth,String phoneNumber, HttpServletResponse response) {
 
-        userService.delete(phoneNumber);
+        log.info("delete Authorization = {}", auth);
+
+        JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(auth);
+        //DecodedJWT token = JWT.require(Algorithm.HMAC256(JwtProperties.SECRET)).build().verify(auth);
+        return printToken(auth);
+
+    }
+
+    public String printToken(String token) {
+        String [] tokens = token.split("\\.");
+        System.out.println("header = " + new String(Base64.getDecoder().decode(tokens[0])));
+        System.out.println("body = " + new String(Base64.getDecoder().decode(tokens[1])));
+        return token;
     }
 
 }
