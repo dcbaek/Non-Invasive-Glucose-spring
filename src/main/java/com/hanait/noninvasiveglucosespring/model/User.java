@@ -3,6 +3,7 @@ package com.hanait.noninvasiveglucosespring.model;
 
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -27,6 +28,8 @@ public class User {
     private String birthDay;
     private String sex;
 
+    private String refreshToken;
+
     // ENUM으로 안하고 ,로 해서 구분해서 ROLE을 입력 -> 그걸 파싱!!
     public List<String> getRoleList() {
         if (this.roles.length() > 0) {
@@ -35,7 +38,26 @@ public class User {
         return new ArrayList<>();
     }
 
-    public RowSet toEntity() {
-        return null;
+    public void updatePassword(PasswordEncoder passwordEncoder, String password) {
+        this.password = passwordEncoder.encode(password);
+    }
+
+    public void updateNickName(String nickname){
+        this.nickname = nickname;
+    }
+    public void updateSex(String sex){
+        this.sex = sex;
+    }
+
+    public void updateBirthDay(String birthDay) {
+        this.birthDay = birthDay;
+    }
+
+    public void updateRefreshToken(String refreshToken){
+        this.refreshToken = refreshToken;
+    }
+
+    public void destroyRefreshToken(){
+        this.refreshToken = null;
     }
 }

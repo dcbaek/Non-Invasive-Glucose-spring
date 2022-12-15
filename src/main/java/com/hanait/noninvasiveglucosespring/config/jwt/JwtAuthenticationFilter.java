@@ -85,19 +85,25 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .withSubject(principalDetailis.getUsername())
                 .withExpiresAt(new Date(System.currentTimeMillis()+JwtProperties.EXPIRATION_TIME))
                 .withClaim("id", principalDetailis.getUser().getId())
-                .withClaim("phoneNumber", principalDetailis.getUser().getPhoneNumber())
+                .withClaim("phoneNumber", principalDetailis.getUsername())
                 .sign(Algorithm.HMAC512(JwtProperties.SECRET));
 
-        String refreshToken = JWT.create()
-                        .withSubject(principalDetailis.getUsername())
-                        .withExpiresAt(new Date(System.currentTimeMillis()+JwtProperties.EXPIRATION_TIME))
-                        .withIssuedAt(new Date(System.currentTimeMillis()))
-                        .sign(Algorithm.HMAC512(JwtProperties.SECRET));
 
         response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX+jwtToken);
         //새롭게추가
-        response.setHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX+jwtToken);
+    }
 
+    public static String createRefreshToken(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
+                                            Authentication authResult, String AccessToken) {
+
+        PrincipalDetails principalDetailis = (PrincipalDetails) authResult.getPrincipal();
+
+        return JWT.create()
+                .withSubject(principalDetailis.getUsername())
+                .withClaim("AccessToken", AccessToken)
+                .withClaim("phoneNumber", principalDetailis.getUsername())
+                .withExpiresAt(new Date(System.currentTimeMillis()+JwtProperties.EXPIRATION_TIME))
+                .sign(Algorithm.HMAC512(JwtProperties.SECRET));
     }
 
 

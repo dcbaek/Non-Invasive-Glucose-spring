@@ -1,8 +1,8 @@
 package com.hanait.noninvasiveglucosespring.controller;
 
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hanait.noninvasiveglucosespring.config.auth.PrincipalDetails;
 import com.hanait.noninvasiveglucosespring.config.jwt.JwtProperties;
 import com.hanait.noninvasiveglucosespring.dto.LoginRequestDto;
@@ -13,6 +13,7 @@ import com.hanait.noninvasiveglucosespring.validator.CheckUsernameValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -21,6 +22,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 
@@ -157,21 +159,53 @@ public class UserController {
     }
 
     @PostMapping("/user/delete")
-    public String deleteUser(@RequestHeader("Authorization") String auth,String phoneNumber, HttpServletResponse response) {
+    public Map<String, Object> deleteUser(@RequestHeader("Authorization")  String auth, @AuthenticationPrincipal User user,
+                                          HttpServletRequest request, HttpServletResponse response) throws JsonProcessingException {
 
         log.info("delete Authorization = {}", auth);
 
-        JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(auth);
-        //DecodedJWT token = JWT.require(Algorithm.HMAC256(JwtProperties.SECRET)).build().verify(auth);
-        return printToken(auth);
+        auth = request.getHeader(JwtProperties.HEADER_STRING).replace(JwtProperties.TOKEN_PREFIX, "");
+
+        log.info("delete Authorization2 = {}", auth);
+
+        //printToken(auth);
+
+        Map<String, Object> map = new HashMap<String, Object>();
+
+        String [] tokens = auth.split("\\.");
+
+        //System.out.println("header = " + new String(Base64.getDecoder().decode(tokens[0])));
+        log.info("body = {}", new String(Base64.getDecoder().decode(tokens[1])));
+
+        String payload = new String(Base64.getDecoder().decode(tokens[1]));
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        Map<String, Object> returnMap = mapper.readValue(payload, Map.class);
+
+        String phoneNumber = (String) returnMap.get("phoneNumber");
+
+        return userService.delete(phoneNumber);
 
     }
 
-    public String printToken(String token) {
-        String [] tokens = token.split("\\.");
-        System.out.println("header = " + new String(Base64.getDecoder().decode(tokens[0])));
-        System.out.println("body = " + new String(Base64.getDecoder().decode(tokens[1])));
-        return token;
-    }
+//    public String printToken(String token) throws JsonProcessingException {
+//
+//        Map<String, Object> map = new HashMap<String, Object>();
+//
+//        String [] tokens = token.split("\\.");
+//
+//        //System.out.println("header = " + new String(Base64.getDecoder().decode(tokens[0])));
+//        log.info("body = {}", new String(Base64.getDecoder().decode(tokens[1])));
+//
+//
+//        String payload = new String(Base64.getDecoder().decode(tokens[1]));
+//
+//        ObjectMapper mapper = new ObjectMapper();
+//
+//        Map<String, Object> returnMap = mapper.readValue(payload, Map.class);
+//
+//        return returnMap;
+//    }
 
 }

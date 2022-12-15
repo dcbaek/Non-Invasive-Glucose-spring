@@ -2,10 +2,15 @@ package com.hanait.noninvasiveglucosespring;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.hanait.noninvasiveglucosespring.config.jwt.JwtProperties;
 import org.assertj.core.api.BDDAssertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.Size;
 import java.util.Base64;
 
@@ -22,11 +27,30 @@ public class JwtTest {
         System.out.println(auth0);
         printToken(auth0);
 
+        DecodedJWT decodedJWT = JWT.decode(auth0);
+
+        System.out.println(decodedJWT.getClaim(JwtProperties.SECRET).toString());
+
     }
 
-    public void printToken(String token) {
-         String [] tokens = token.split("\\.");
+    public String printToken(String token) {
+
+        String [] tokens = token.split("\\.");
+
+        //token = request.getHeader(JwtProperties.HEADER_STRING).replace(JwtProperties.TOKEN_PREFIX, "");
+
         System.out.println("header = " + new String(Base64.getDecoder().decode(tokens[0])));
         System.out.println("body = " + new String(Base64.getDecoder().decode(tokens[1])));
+        return token;
+    }
+
+    @PostMapping("/user/delete")
+    public void deleteUser(@RequestHeader("Authorization") String auth, String phoneNumber, HttpServletResponse response) {
+
+        System.out.println("delete Authorization = {}" + auth);
+
+        JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(auth);
+
+
     }
 }

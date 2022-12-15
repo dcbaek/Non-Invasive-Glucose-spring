@@ -1,17 +1,17 @@
 package com.hanait.noninvasiveglucosespring.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hanait.noninvasiveglucosespring.dto.LoginRequestDto;
-import com.hanait.noninvasiveglucosespring.dto.UserResponseDto;
 import com.hanait.noninvasiveglucosespring.model.User;
 import com.hanait.noninvasiveglucosespring.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.lang.module.ResolutionException;
+import java.util.Base64;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -39,14 +39,30 @@ public class UserService {
                 .sex(user.getSex())
                 .build();
     }
+    public String printToken(String token) throws JsonProcessingException {
+
+        String [] tokens = token.split("\\.");
+
+        //System.out.println("header = " + new String(Base64.getDecoder().decode(tokens[0])));
+        log.info("body = {}", new String(Base64.getDecoder().decode(tokens[1])));
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        String jsonToken = mapper.writeValueAsString(token);
+
+        return jsonToken;
+    }
 
     @Transactional
-    public void delete(String phoneNumber) {
-
-        log.info("delete phoneNumer = {}", phoneNumber);
+    public Map<String, Object> delete(String phoneNumber) throws JsonProcessingException {
+        
         User user = userRepository.findByPhoneNumber(phoneNumber);
+
         userRepository.delete(user);
 
+        log.info("회원 삭제 완료");
+
+        return null;
     }
 
     @Transactional(readOnly = true)
