@@ -39,23 +39,10 @@ public class UserService {
                 .sex(user.getSex())
                 .build();
     }
-    public String printToken(String token) throws JsonProcessingException {
-
-        String [] tokens = token.split("\\.");
-
-        //System.out.println("header = " + new String(Base64.getDecoder().decode(tokens[0])));
-        log.info("body = {}", new String(Base64.getDecoder().decode(tokens[1])));
-
-        ObjectMapper mapper = new ObjectMapper();
-
-        String jsonToken = mapper.writeValueAsString(token);
-
-        return jsonToken;
-    }
 
     @Transactional
-    public Map<String, Object> delete(String phoneNumber) throws JsonProcessingException {
-        
+    public Map<String, Object> delete(String phoneNumber) {
+
         User user = userRepository.findByPhoneNumber(phoneNumber);
 
         userRepository.delete(user);

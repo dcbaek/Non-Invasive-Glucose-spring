@@ -44,13 +44,4 @@ public class JwtTest {
         return token;
     }
 
-    @PostMapping("/user/delete")
-    public void deleteUser(@RequestHeader("Authorization") String auth, String phoneNumber, HttpServletResponse response) {
-
-        System.out.println("delete Authorization = {}" + auth);
-
-        JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(auth);
-
-
-    }
 }

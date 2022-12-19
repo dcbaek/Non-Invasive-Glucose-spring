@@ -1,6 +1,7 @@
 package com.hanait.noninvasiveglucosespring.controller;
 
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hanait.noninvasiveglucosespring.config.auth.PrincipalDetails;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.*;
 
 @Slf4j
@@ -54,19 +56,6 @@ public class UserController {
 
     // Tip : JWT를 사용하면 UserDetailsService를 호출하지 않기 때문에 @AuthenticationPrincipal 사용 불가능.
     // 왜냐하면 @AuthenticationPrincipal은 UserDetailsService에서 리턴될 때 만들어지기 때문이다.
-
-    // 유저 혹은 매니저 혹은 어드민이 접근 가능
-    @PostMapping("/user/info")
-    public Authentication infoUser(User user, LoginRequestDto dto, Authentication authentication, HttpServletResponse response) {
-        PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
-
-        log.info("Authentication info = {}", authentication);
-
-        response.setContentType("application/json");
-        response.setCharacterEncoding("utf-8");
-
-        return authentication;
-    }
 
     // 매니저 혹은 어드민이 접근 가능
     @GetMapping("/manager/reports")
@@ -140,8 +129,31 @@ public class UserController {
         return "사용 가능한 번호 입니다.";
     }
 
+    // 유저 혹은 매니저 혹은 어드민이 접근 가능
+    @PostMapping("/user/info")
+    public Authentication infoUser(Authentication authentication, HttpServletResponse response) throws IOException {
+        PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
+
+        log.info("Authentication info = {}", authentication);
+        log.info("principal = {}", principal.getUser());
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding("utf-8");
+
+//        ObjectMapper mapper = new ObjectMapper();
+//
+//        Map<String, Object> returnMap = mapper.readValue((JsonParser) authentication, Map.class);
+//
+//        String userInfo = (String) returnMap.get("phoneNumber");
+
+        return authentication;
+    }
+
     @PutMapping("/user/edit")
-    public Optional<User> editUser(@RequestParam String phoneNumber, @RequestBody User user) {
+    public void editUser(@RequestHeader("Authorization") String token, User user,String phoneNumber, Authentication authentication) {
+
+        PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
+        log.info("principal = {}", principal.getUser());
 
         Optional<User> updateUser = Optional.ofNullable(userRepository.findByPhoneNumber(phoneNumber));
 
@@ -154,28 +166,22 @@ public class UserController {
 
             userRepository.save(selectUser);
         });
-
-        return updateUser;
     }
 
     @PostMapping("/user/delete")
-    public Map<String, Object> deleteUser(@RequestHeader("Authorization")  String auth, @AuthenticationPrincipal User user,
+    public Map<String, Object> deleteUser(@RequestHeader("Authorization")  String token, @AuthenticationPrincipal User user,
                                           HttpServletRequest request, HttpServletResponse response) throws JsonProcessingException {
 
-        log.info("delete Authorization = {}", auth);
+        log.info("delete Authorization = {}", token);
 
-        auth = request.getHeader(JwtProperties.HEADER_STRING).replace(JwtProperties.TOKEN_PREFIX, "");
+        token = request.getHeader(JwtProperties.HEADER_STRING).replace(JwtProperties.TOKEN_PREFIX, "");
 
-        log.info("delete Authorization2 = {}", auth);
+        log.info("delete Authorization2 = {}", token);
 
-        //printToken(auth);
-
-        Map<String, Object> map = new HashMap<String, Object>();
-
-        String [] tokens = auth.split("\\.");
+        String [] tokens = token.split("\\.");
 
         //System.out.println("header = " + new String(Base64.getDecoder().decode(tokens[0])));
-        log.info("body = {}", new String(Base64.getDecoder().decode(tokens[1])));
+        //log.info("body = {}", new String(Base64.getDecoder().decode(tokens[1])));
 
         String payload = new String(Base64.getDecoder().decode(tokens[1]));
 

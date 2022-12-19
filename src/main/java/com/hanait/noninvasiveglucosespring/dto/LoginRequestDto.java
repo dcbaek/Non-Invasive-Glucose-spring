@@ -1,5 +1,6 @@
 package com.hanait.noninvasiveglucosespring.dto;
 
+import com.hanait.noninvasiveglucosespring.model.BaseTimeEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,7 +12,7 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class LoginRequestDto {
+public class LoginRequestDto extends BaseTimeEntity {
 
     private Long id;
     @NotBlank(message = "아이디는 필수 입력 값입니다.")

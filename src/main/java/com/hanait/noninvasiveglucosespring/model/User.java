@@ -3,6 +3,7 @@ package com.hanait.noninvasiveglucosespring.model;
 
 import lombok.Builder;
 import lombok.Data;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.Entity;
@@ -16,7 +17,8 @@ import java.util.List;
 
 @Data
 @Entity
-public class User {
+@DynamicUpdate
+public class User extends BaseTimeEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
