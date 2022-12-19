@@ -27,7 +27,7 @@ public class UserService {
     }
 
     //https://binco.tistory.com/entry/SpringBoot-JPA-%EA%B2%8C%EC%8B%9C%ED%8C%90-CRUD-%EA%B5%AC%ED%98%84Read
-    public LoginRequestDto userinfo(String phoneNumber) {
+    public LoginRequestDto update(String phoneNumber) {
 
         User user = userRepository.findByPhoneNumber(phoneNumber);
 
@@ -41,7 +41,20 @@ public class UserService {
     }
 
     @Transactional
-    public Map<String, Object> delete(String phoneNumber) {
+    public Map<String, Object> delete(String token) throws JsonProcessingException {
+
+        String [] tokens = token.split("\\.");
+
+        //System.out.println("header = " + new String(Base64.getDecoder().decode(tokens[0])));
+        log.info("body = {}", new String(Base64.getDecoder().decode(tokens[1])));
+
+        String payload = new String(Base64.getDecoder().decode(tokens[1]));
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        Map<String, Object> returnMap = mapper.readValue(payload, Map.class);
+
+        String phoneNumber = (String) returnMap.get("phoneNumber");
 
         User user = userRepository.findByPhoneNumber(phoneNumber);
 

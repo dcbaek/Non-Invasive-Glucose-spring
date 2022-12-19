@@ -140,70 +140,19 @@ public class UserController {
         response.setContentType("application/json");
         response.setCharacterEncoding("utf-8");
 
-//        ObjectMapper mapper = new ObjectMapper();
-//
-//        Map<String, Object> returnMap = mapper.readValue((JsonParser) authentication, Map.class);
-//
-//        String userInfo = (String) returnMap.get("phoneNumber");
+        ObjectMapper mapper = new ObjectMapper();
+
+        Map<String, Object> returnMap = mapper.readValue((JsonParser) authentication, Map.class);
+
+        log.info("returnMap = {}", returnMap);
 
         return authentication;
     }
 
-    @PutMapping("/user/edit")
-    public void editUser(@RequestHeader("Authorization") String token, User user,String phoneNumber, Authentication authentication) {
-
-        PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
-        log.info("principal = {}", principal.getUser());
-
-        Optional<User> updateUser = Optional.ofNullable(userRepository.findByPhoneNumber(phoneNumber));
-
-        log.info("updateUser = {}", updateUser);
-
-        updateUser.ifPresent(selectUser -> {
-            selectUser.setNickname(user.getNickname());
-            selectUser.setBirthDay(user.getBirthDay());
-            selectUser.setSex(user.getSex());
-
-            userRepository.save(selectUser);
-        });
-    }
-
-    @PostMapping("/user/delete")
-    public Map<String, Object> deleteUser(@RequestHeader("Authorization")  String token, @AuthenticationPrincipal User user,
-                                          HttpServletRequest request, HttpServletResponse response) throws JsonProcessingException {
-
-        log.info("delete Authorization = {}", token);
-
-        token = request.getHeader(JwtProperties.HEADER_STRING).replace(JwtProperties.TOKEN_PREFIX, "");
-
-        log.info("delete Authorization2 = {}", token);
-
-        String [] tokens = token.split("\\.");
-
-        //System.out.println("header = " + new String(Base64.getDecoder().decode(tokens[0])));
-        //log.info("body = {}", new String(Base64.getDecoder().decode(tokens[1])));
-
-        String payload = new String(Base64.getDecoder().decode(tokens[1]));
-
-        ObjectMapper mapper = new ObjectMapper();
-
-        Map<String, Object> returnMap = mapper.readValue(payload, Map.class);
-
-        String phoneNumber = (String) returnMap.get("phoneNumber");
-
-        return userService.delete(phoneNumber);
-
-    }
-
-//    public String printToken(String token) throws JsonProcessingException {
-//
-//        Map<String, Object> map = new HashMap<String, Object>();
+//    @PutMapping("/user/edit")
+//    public String editUser(@RequestHeader("Authorization") String token, Authentication authentication) throws IOException {
 //
 //        String [] tokens = token.split("\\.");
-//
-//        //System.out.println("header = " + new String(Base64.getDecoder().decode(tokens[0])));
-//        log.info("body = {}", new String(Base64.getDecoder().decode(tokens[1])));
-//
 //
 //        String payload = new String(Base64.getDecoder().decode(tokens[1]));
 //
@@ -211,7 +160,19 @@ public class UserController {
 //
 //        Map<String, Object> returnMap = mapper.readValue(payload, Map.class);
 //
-//        return returnMap;
+//        log.info("returnMap = {}", returnMap);
+//
+//        return userService.update(token);
+//
 //    }
+
+    @PostMapping("/user/delete")
+    public Map<String, Object> deleteUser(@RequestHeader("Authorization")  String token,
+                                          HttpServletRequest request) throws JsonProcessingException {
+        token = request.getHeader(JwtProperties.HEADER_STRING).replace(JwtProperties.TOKEN_PREFIX, "");
+
+        return userService.delete(token);
+
+    }
 
 }
