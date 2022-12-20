@@ -14,7 +14,6 @@ import com.hanait.noninvasiveglucosespring.validator.CheckUsernameValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -131,40 +130,63 @@ public class UserController {
 
     // 유저 혹은 매니저 혹은 어드민이 접근 가능
     @PostMapping("/user/info")
-    public Authentication infoUser(Authentication authentication, HttpServletResponse response) throws IOException {
-        PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
-
-        log.info("Authentication info = {}", authentication);
-        log.info("principal = {}", principal.getUser());
+    public Map<String, Object> infoUser(@RequestHeader("Authorization") String token, HttpServletRequest request,
+                                   HttpServletResponse response) throws IOException {
 
         response.setContentType("application/json");
         response.setCharacterEncoding("utf-8");
 
+        token = request.getHeader(JwtProperties.HEADER_STRING).replace(JwtProperties.TOKEN_PREFIX, "");
+
+        String [] tokens = token.split("\\.");
+
+        String payload = new String(Base64.getDecoder().decode(tokens[1]));
+
         ObjectMapper mapper = new ObjectMapper();
 
-        Map<String, Object> returnMap = mapper.readValue((JsonParser) authentication, Map.class);
+        Map<String, Object> infoUser = mapper.readValue(payload, Map.class);
+
+        log.info("infoUser = {}", infoUser);
+
+        return infoUser;
+    }
+
+    @PutMapping("/user/edit")
+    public Optional<User> editUser(@RequestHeader("Authorization") String token, @RequestBody User user,
+                                   HttpServletRequest request) throws IOException {
+
+        token = request.getHeader(JwtProperties.HEADER_STRING).replace(JwtProperties.TOKEN_PREFIX, "");
+
+        String [] tokens = token.split("\\.");
+
+        String payload = new String(Base64.getDecoder().decode(tokens[1]));
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        Map<String, Object> returnMap = mapper.readValue(payload, Map.class);
 
         log.info("returnMap = {}", returnMap);
 
-        return authentication;
-    }
+        Long id = Long.parseLong(String.valueOf(returnMap.get("id")));
 
-//    @PutMapping("/user/edit")
-//    public String editUser(@RequestHeader("Authorization") String token, Authentication authentication) throws IOException {
-//
-//        String [] tokens = token.split("\\.");
-//
-//        String payload = new String(Base64.getDecoder().decode(tokens[1]));
-//
-//        ObjectMapper mapper = new ObjectMapper();
-//
-//        Map<String, Object> returnMap = mapper.readValue(payload, Map.class);
-//
-//        log.info("returnMap = {}", returnMap);
-//
-//        return userService.update(token);
-//
-//    }
+        Optional<User> updateUser = userRepository.findById(id);
+
+        updateUser.ifPresent(selectUser -> {
+            if(user.getNickname() != null) {
+                selectUser.setNickname(user.getNickname());
+            }
+            if (user.getSex() != null) {
+                selectUser.setSex(user.getSex());
+            }
+            if (user.getBirthDay() != null) {
+                selectUser.setBirthDay(user.getBirthDay());
+            }
+            User newUser = userRepository.save(selectUser);
+        });
+
+        return updateUser;
+
+    }
 
     @PostMapping("/user/delete")
     public Map<String, Object> deleteUser(@RequestHeader("Authorization")  String token,

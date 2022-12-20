@@ -19,6 +19,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Date;
 
 // spring security에서 UsernamePasswordAuthenticationFilter가 있음
@@ -82,12 +83,12 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         PrincipalDetails principalDetailis = (PrincipalDetails) authResult.getPrincipal();
 
         String jwtToken = JWT.create()
-                .withSubject(principalDetailis.getUsername())
                 .withExpiresAt(new Date(System.currentTimeMillis()+JwtProperties.EXPIRATION_TIME))
                 .withClaim("id", principalDetailis.getUser().getId())
                 .withClaim("phoneNumber", principalDetailis.getUsername())
                 .withClaim("sex", principalDetailis.getUser().getSex())
                 .withClaim("nickname", principalDetailis.getUser().getNickname())
+                .withClaim("createdDate", String.valueOf(principalDetailis.getUser().getCreatedDate()))
                 .sign(Algorithm.HMAC512(JwtProperties.SECRET));
 
 

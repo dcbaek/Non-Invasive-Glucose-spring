@@ -10,8 +10,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -27,17 +29,18 @@ public class UserService {
     }
 
     //https://binco.tistory.com/entry/SpringBoot-JPA-%EA%B2%8C%EC%8B%9C%ED%8C%90-CRUD-%EA%B5%AC%ED%98%84Read
-    public LoginRequestDto update(String phoneNumber) {
+    public String update(Long id) {
 
-        User user = userRepository.findByPhoneNumber(phoneNumber);
+        Optional<User> updateUser = userRepository.findById(id);
 
-        return LoginRequestDto.builder()
-                .id(user.getId())
-                .phoneNumber(user.getPhoneNumber())
-                .nickname(user.getNickname())
-                .birthDay(user.getBirthDay())
-                .sex(user.getSex())
-                .build();
+        updateUser.ifPresent(selectUser -> {
+            selectUser.setNickname(selectUser.getNickname());
+
+            User newUser = userRepository.save(selectUser);
+            log.info("newUser = {}", newUser);
+        });
+
+        return "수정 완료";
     }
 
     @Transactional
