@@ -41,11 +41,11 @@ public class SecurityConfig {
                 .formLogin().disable()
                 .httpBasic().disable().apply(new MyCustomDsl()) // 커스텀 필터 등록
                 .and()
-                .authorizeRequests(authroize -> authroize.antMatchers("/wellink/user/**")
+                .authorizeRequests(authroize -> authroize.antMatchers("/api/user/**")
                         .access("hasRole('ROLE_USER') or hasRole('ROLE_MANAGER') or hasRole('ROLE_ADMIN')")
-                        .antMatchers("/wellink/manager/**")
+                        .antMatchers("/api/manager/**")
                         .access("hasRole('ROLE_MANAGER') or hasRole('ROLE_ADMIN')")
-                        .antMatchers("/wellink/admin/**")
+                        .antMatchers("/api/admin/**")
                         .access("hasRole('ROLE_ADMIN')")
                         .anyRequest().permitAll())
                 .build();

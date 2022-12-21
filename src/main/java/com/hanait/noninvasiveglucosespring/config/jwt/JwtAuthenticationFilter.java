@@ -86,8 +86,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .withExpiresAt(new Date(System.currentTimeMillis()+JwtProperties.EXPIRATION_TIME))
                 .withClaim("id", principalDetailis.getUser().getId())
                 .withClaim("phoneNumber", principalDetailis.getUsername())
-                .withClaim("sex", principalDetailis.getUser().getSex())
                 .withClaim("nickname", principalDetailis.getUser().getNickname())
+                .withClaim("sex", principalDetailis.getUser().getSex())
+                .withClaim("birthDay", principalDetailis.getUser().getBirthDay())
                 .withClaim("createdDate", String.valueOf(principalDetailis.getUser().getCreatedDate()))
                 .sign(Algorithm.HMAC512(JwtProperties.SECRET));
 

@@ -152,8 +152,8 @@ public class UserController {
     }
 
     @PutMapping("/user/edit")
-    public Optional<User> editUser(@RequestHeader("Authorization") String token, @RequestBody User user,
-                                   HttpServletRequest request) throws IOException {
+    public Optional<User> editUser(@RequestHeader(value = "Authorization", required = false) String token,
+                                   @RequestBody User user, HttpServletRequest request) throws IOException {
 
         token = request.getHeader(JwtProperties.HEADER_STRING).replace(JwtProperties.TOKEN_PREFIX, "");
 
@@ -163,11 +163,12 @@ public class UserController {
 
         ObjectMapper mapper = new ObjectMapper();
 
-        Map<String, Object> returnMap = mapper.readValue(payload, Map.class);
+        Map<String, Object> editUser = mapper.readValue(payload, Map.class);
 
-        log.info("returnMap = {}", returnMap);
+        log.info("editUser = {}", editUser);
 
-        Long id = Long.parseLong(String.valueOf(returnMap.get("id")));
+
+        Long id = Long.parseLong(String.valueOf(editUser.get("id")));
 
         Optional<User> updateUser = userRepository.findById(id);
 
@@ -182,6 +183,7 @@ public class UserController {
                 selectUser.setBirthDay(user.getBirthDay());
             }
             User newUser = userRepository.save(selectUser);
+            log.info("newUser = {}", newUser);
         });
 
         return updateUser;
