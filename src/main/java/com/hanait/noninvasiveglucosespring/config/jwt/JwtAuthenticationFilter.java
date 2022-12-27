@@ -2,10 +2,10 @@ package com.hanait.noninvasiveglucosespring.config.jwt;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hanait.noninvasiveglucosespring.config.auth.PrincipalDetails;
 import com.hanait.noninvasiveglucosespring.dto.LoginRequestDto;
+import com.hanait.noninvasiveglucosespring.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,7 +19,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Date;
 
 // spring security에서 UsernamePasswordAuthenticationFilter가 있음
@@ -30,6 +29,7 @@ import java.util.Date;
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter{
 
     private final AuthenticationManager authenticationManager;
+//    private final UserService userService;
 
     // Authentication 객체 만들어서 리턴 => 의존 : AuthenticationManager
     // 인증 요청시에 실행되는 함수 => /login
@@ -83,7 +83,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         PrincipalDetails principalDetailis = (PrincipalDetails) authResult.getPrincipal();
 
         String jwtToken = JWT.create()
-                .withExpiresAt(new Date(System.currentTimeMillis()+JwtProperties.EXPIRATION_TIME))
+                .withSubject(principalDetailis.getUsername())
+                .withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.EXPIRATION_TIME))
                 .withClaim("id", principalDetailis.getUser().getId())
                 .withClaim("phoneNumber", principalDetailis.getUsername())
                 .withClaim("nickname", principalDetailis.getUser().getNickname())
@@ -92,23 +93,18 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .withClaim("createdDate", String.valueOf(principalDetailis.getUser().getCreatedDate()))
                 .sign(Algorithm.HMAC512(JwtProperties.SECRET));
 
+//        String refreshToken = JWT.create()
+//                .withSubject(principalDetailis.getUsername())
+//                .withClaim("phoneNumber", principalDetailis.getUsername())
+//                .withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.REFRESH_EXPIRATION_TIME))
+//                .withIssuedAt(new Date(System.currentTimeMillis()))
+//                .sign(Algorithm.HMAC512(JwtProperties.SECRET));
+//
+//        userService.updateRefreshToken(principalDetailis.getUsername(), refreshToken);
 
-        response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX+jwtToken);
+
+        response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX + jwtToken);
         //새롭게추가
     }
-
-    public static String createRefreshToken(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
-                                            Authentication authResult, String AccessToken) {
-
-        PrincipalDetails principalDetailis = (PrincipalDetails) authResult.getPrincipal();
-
-        return JWT.create()
-                .withSubject(principalDetailis.getUsername())
-                .withClaim("AccessToken", AccessToken)
-                .withClaim("phoneNumber", principalDetailis.getUsername())
-                .withExpiresAt(new Date(System.currentTimeMillis()+JwtProperties.EXPIRATION_TIME))
-                .sign(Algorithm.HMAC512(JwtProperties.SECRET));
-    }
-
 
 }

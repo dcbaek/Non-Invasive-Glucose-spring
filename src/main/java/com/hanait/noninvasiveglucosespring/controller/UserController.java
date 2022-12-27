@@ -128,6 +128,21 @@ public class UserController {
         return "사용 가능한 번호 입니다.";
     }
 
+    @PostMapping("/user/checkpw")
+    public String checkPassword(@RequestHeader(value = "Authorization", required = false) String token,
+                                Authentication authentication,
+                                @RequestBody User user) {
+
+        PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
+
+        if (bCryptPasswordEncoder.matches(user.getPassword(), principal.getUser().getPassword())) {
+            return "비밀번호 일치";
+        } else {
+            return "비밀번호 다시 확인";
+        }
+
+    }
+
     // 유저 혹은 매니저 혹은 어드민이 접근 가능
     @PostMapping("/user/info")
     public Map<String, Object> infoUser(@RequestHeader("Authorization") String token, HttpServletRequest request,
@@ -167,7 +182,6 @@ public class UserController {
 
         log.info("editUser = {}", editUser);
 
-
         Long id = Long.parseLong(String.valueOf(editUser.get("id")));
 
         Optional<User> updateUser = userRepository.findById(id);
@@ -181,6 +195,9 @@ public class UserController {
             }
             if (user.getBirthDay() != null) {
                 selectUser.setBirthDay(user.getBirthDay());
+            }
+            if (user.getPassword() != null) {
+                selectUser.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
             }
             User newUser = userRepository.save(selectUser);
             log.info("newUser = {}", newUser);
