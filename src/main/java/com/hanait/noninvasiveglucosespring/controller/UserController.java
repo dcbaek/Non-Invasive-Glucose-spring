@@ -21,6 +21,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -130,12 +131,16 @@ public class UserController {
 
     @PostMapping("/user/checkpw")
     public String checkPassword(@RequestHeader(value = "Authorization", required = false) String token,
-                                Authentication authentication,
-                                @RequestBody User user) {
+                                @RequestParam("password") String password, Authentication authentication,
+                                HttpServletRequest request, RedirectAttributes redirectAttributes) {
 
         PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
 
-        if (bCryptPasswordEncoder.matches(user.getPassword(), principal.getUser().getPassword())) {
+        log.info("password = {}", password);
+        log.info("user = {}", principal.getUser());
+        log.info("principal password = {}", principal.getUser().getPassword());
+
+        if (bCryptPasswordEncoder.matches(password, principal.getUser().getPassword())) {
             return "비밀번호 일치";
         } else {
             return "비밀번호 다시 확인";

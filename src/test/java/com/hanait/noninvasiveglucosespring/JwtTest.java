@@ -6,6 +6,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.hanait.noninvasiveglucosespring.config.jwt.JwtProperties;
 import org.assertj.core.api.BDDAssertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 
@@ -42,6 +43,10 @@ public class JwtTest {
         System.out.println("header = " + new String(Base64.getDecoder().decode(tokens[0])));
         System.out.println("body = " + new String(Base64.getDecoder().decode(tokens[1])));
         return token;
+    }
+
+    public void checkpw(Authentication authentication) {
+
     }
 
 }
