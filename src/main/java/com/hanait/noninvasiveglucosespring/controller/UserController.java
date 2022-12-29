@@ -1,12 +1,10 @@
 package com.hanait.noninvasiveglucosespring.controller;
 
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hanait.noninvasiveglucosespring.config.auth.PrincipalDetails;
 import com.hanait.noninvasiveglucosespring.config.jwt.JwtProperties;
-import com.hanait.noninvasiveglucosespring.dto.LoginRequestDto;
 import com.hanait.noninvasiveglucosespring.model.User;
 import com.hanait.noninvasiveglucosespring.repository.UserRepository;
 import com.hanait.noninvasiveglucosespring.service.UserService;
@@ -21,7 +19,6 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -99,12 +96,6 @@ public class UserController {
     public String findPhoneNumber(@Validated @RequestBody User user, Model model,
                                   BindingResult bindingResult, HttpServletResponse response) {
 
-        LoginRequestDto dto = new LoginRequestDto();
-
-        log.info("phoneNumber={}", user.getPhoneNumber());
-        log.info("User={}", user);
-        log.info("dto={}", dto);
-
         response.setContentType("application/json");
         response.setCharacterEncoding("utf-8");
 
@@ -130,22 +121,64 @@ public class UserController {
     }
 
     @PostMapping("/user/checkpw")
-    public String checkPassword(@RequestHeader(value = "Authorization", required = false) String token,
-                                @RequestParam("password") String password, Authentication authentication,
-                                HttpServletRequest request, RedirectAttributes redirectAttributes) {
+    public String checkPassword(@RequestHeader(value = "Authorization", required = false) String token, User user,
+                                @RequestParam("password") String password,@RequestParam("newPassword") String newPassword,
+                                Authentication authentication, HttpServletResponse response, HttpServletRequest request) throws IOException {
 
         PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
 
-        log.info("password = {}", password);
-        log.info("user = {}", principal.getUser());
-        log.info("principal password = {}", principal.getUser().getPassword());
+        token = request.getHeader(JwtProperties.HEADER_STRING).replace(JwtProperties.TOKEN_PREFIX, "");
+
+        String [] tokens = token.split("\\.");
+
+        String payload = new String(Base64.getDecoder().decode(tokens[1]));
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        Map<String, Object> editUser = mapper.readValue(payload, Map.class);
+
+        Long id = Long.parseLong(String.valueOf(editUser.get("id")));
+
+        Optional<User> updateUser = userRepository.findById(id);
 
         if (bCryptPasswordEncoder.matches(password, principal.getUser().getPassword())) {
-            return "비밀번호 일치";
+
+            updateUser.ifPresent(selectUser -> {
+                if (newPassword != null) {
+                    selectUser.setPassword(bCryptPasswordEncoder.encode(newPassword));
+                }
+                User newUser = userRepository.save(selectUser);
+                log.info("비밀번호 변경완료");
+            });
+            return "비밀번호 변경";
         } else {
-            return "비밀번호 다시 확인";
+            response.sendError(404,"비밀번호 오류");
         }
 
+        return null;
+    }
+
+    @PostMapping("/user/findpw")
+    public String findPassword(@RequestParam("phoneNumber") String phoneNumber,
+                             @RequestParam("password") String password) throws JsonProcessingException {
+
+        userRepository.findByPhoneNumber(phoneNumber);
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        Map<String, Object> findpw = mapper.readValue(phoneNumber, Map.class);
+
+        Long id = Long.parseLong(String.valueOf(findpw.get("id")));
+
+        Optional<User> findPassword = userRepository.findById(id);
+
+        findPassword.ifPresent(selectUser -> {
+            selectUser.setPassword(bCryptPasswordEncoder.encode(password));
+            User newUser = userRepository.save(selectUser);
+            log.info("비밀번호 변경완료");
+        });
+
+        return "비밀번호 찾기 완료";
     }
 
     // 유저 혹은 매니저 혹은 어드민이 접근 가능
@@ -185,8 +218,6 @@ public class UserController {
 
         Map<String, Object> editUser = mapper.readValue(payload, Map.class);
 
-        log.info("editUser = {}", editUser);
-
         Long id = Long.parseLong(String.valueOf(editUser.get("id")));
 
         Optional<User> updateUser = userRepository.findById(id);
@@ -201,11 +232,9 @@ public class UserController {
             if (user.getBirthDay() != null) {
                 selectUser.setBirthDay(user.getBirthDay());
             }
-            if (user.getPassword() != null) {
-                selectUser.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-            }
+
             User newUser = userRepository.save(selectUser);
-            log.info("newUser = {}", newUser);
+
         });
 
         return updateUser;

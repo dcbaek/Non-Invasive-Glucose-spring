@@ -13,6 +13,7 @@ import com.hanait.noninvasiveglucosespring.model.User;
 import com.hanait.noninvasiveglucosespring.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +29,7 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     /* 아이디 중복 여부 확인 */
     @Transactional(readOnly = true)
@@ -73,6 +75,7 @@ public class UserService {
 
         return null;
     }
+
 
     public void updateRefreshToken(String phoneNumber, String refreshToken) {
 
