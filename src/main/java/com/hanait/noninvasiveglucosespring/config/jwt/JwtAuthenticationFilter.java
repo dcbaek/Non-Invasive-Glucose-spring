@@ -29,7 +29,7 @@ import java.util.Date;
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter{
 
     private final AuthenticationManager authenticationManager;
-//    private final UserService userService;
+    //private final UserService userService;
 
     // Authentication 객체 만들어서 리턴 => 의존 : AuthenticationManager
     // 인증 요청시에 실행되는 함수 => /login
@@ -93,18 +93,16 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .withClaim("createdDate", String.valueOf(principalDetailis.getUser().getCreatedDate()))
                 .sign(Algorithm.HMAC512(JwtProperties.SECRET));
 
-//        String refreshToken = JWT.create()
-//                .withSubject(principalDetailis.getUsername())
-//                .withClaim("phoneNumber", principalDetailis.getUsername())
-//                .withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.REFRESH_EXPIRATION_TIME))
-//                .withIssuedAt(new Date(System.currentTimeMillis()))
-//                .sign(Algorithm.HMAC512(JwtProperties.SECRET));
-//
-//        userService.updateRefreshToken(principalDetailis.getUsername(), refreshToken);
+        String refreshToken = JWT.create()
+                .withClaim("phoneNumber", principalDetailis.getUsername())
+                .withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.REFRESH_EXPIRATION_TIME))
+                .withIssuedAt(new Date(System.currentTimeMillis()))
+                .sign(Algorithm.HMAC512(JwtProperties.SECRET));
 
 
         response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX + jwtToken);
         //새롭게추가
+        //response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.REFRESH_TOKEN + refreshToken);
     }
 
 }

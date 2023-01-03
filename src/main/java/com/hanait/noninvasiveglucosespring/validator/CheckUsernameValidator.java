@@ -1,6 +1,8 @@
 package com.hanait.noninvasiveglucosespring.validator;
 
+import com.hanait.noninvasiveglucosespring.model.Caregiver;
 import com.hanait.noninvasiveglucosespring.model.User;
+import com.hanait.noninvasiveglucosespring.repository.CaregiverRepository;
 import com.hanait.noninvasiveglucosespring.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -11,13 +13,18 @@ import org.springframework.validation.Errors;
 public class CheckUsernameValidator extends AbstractValidator<User>{
 
     private final UserRepository userRepository;
+    private final CaregiverRepository caregiverRepository;
 
     @Override
     public void doValidate(User user, Errors errors) {
         if(userRepository.existsByPhoneNumber(user.getPhoneNumber())) {
             errors.rejectValue("phoneNumber", "아이디 중복 오류", "이미 사용 중인 아이디 입니다.");
         }
-
     }
 
+    public void CareValidate(Caregiver caregiver, Errors errors) {
+        if(caregiverRepository.existsByPhoneNumber(caregiver.getPhoneNumber())) {
+            errors.rejectValue("phoneNumber", "아이디 중복 오류", "이미 등록된 보호자 입니다.");
+        }
+    }
 }

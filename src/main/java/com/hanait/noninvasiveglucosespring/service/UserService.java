@@ -57,9 +57,9 @@ public class UserService {
 
         String [] tokens = token.split("\\.");
         //System.out.println("header = " + new String(Base64.getDecoder().decode(tokens[0])));
-        log.info("body = {}", new String(Base64.getDecoder().decode(tokens[1])));
+        log.info("body = {}", new String(Base64.getUrlDecoder().decode(tokens[1])));
 
-        String payload = new String(Base64.getDecoder().decode(tokens[1]));
+        String payload = new String(Base64.getUrlDecoder().decode(tokens[1]));
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -75,7 +75,6 @@ public class UserService {
 
         return null;
     }
-
 
     public void updateRefreshToken(String phoneNumber, String refreshToken) {
 

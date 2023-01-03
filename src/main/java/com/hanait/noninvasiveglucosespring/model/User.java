@@ -3,13 +3,11 @@ package com.hanait.noninvasiveglucosespring.model;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.ToString;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import javax.sql.RowSet;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,10 +16,12 @@ import java.util.List;
 @Data
 @Entity
 @DynamicUpdate
+@ToString(exclude = "caregiver")
 public class User extends BaseTimeEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "userId")
     private long id;
     private String phoneNumber;
     private String nickname;
@@ -32,6 +32,11 @@ public class User extends BaseTimeEntity{
 
     private String refreshToken;
 
+    @OneToMany
+    @JoinTable(name = "USER_CAREGIVER",
+            joinColumns = {@JoinColumn(name = "userId", referencedColumnName = "userId")},
+            inverseJoinColumns = {@JoinColumn(name = "caregiverId", referencedColumnName = "caregiverId")})
+    private List<Caregiver> caregiver = new ArrayList<>();
 
     // ENUM으로 안하고 ,로 해서 구분해서 ROLE을 입력 -> 그걸 파싱!!
     public List<String> getRoleList() {

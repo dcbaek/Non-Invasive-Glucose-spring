@@ -1,6 +1,7 @@
 package com.hanait.noninvasiveglucosespring.controller;
 
 
+import com.auth0.jwt.JWTVerifier;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hanait.noninvasiveglucosespring.config.auth.PrincipalDetails;
@@ -68,22 +69,22 @@ public class UserController {
     }
 
     @PostMapping("/user/join")
-    public String joinUser(@Validated @RequestBody User user, BindingResult bindingResult, Model model, HttpServletResponse response) {
+    public String joinUser(@Validated @RequestBody User user, BindingResult bindingResult, Model model) {
 
-        if (bindingResult.hasErrors()) {
-            // 회원 가입 실패시 입력 데이터 값을 유지
-            model.addAttribute("user", user);
-
-            // 유효서 통과 못한 필드와 메시지를 핸들링
-            Map<String, String> errorMap = new HashMap<>();
-
-            for (FieldError error : bindingResult.getFieldErrors()) {
-                errorMap.put("valid_" + error.getField(), error.getDefaultMessage());
-                log.info("Error message : {}", error.getDefaultMessage());
-            }
-            // 회원 가입 페이지로 다시 리턴
-            return "/home";
-        }
+//        if (bindingResult.hasErrors()) {
+//            // 회원 가입 실패시 입력 데이터 값을 유지
+//            model.addAttribute("user", user);
+//
+//            // 유효서 통과 못한 필드와 메시지를 핸들링
+//            Map<String, String> errorMap = new HashMap<>();
+//
+//            for (FieldError error : bindingResult.getFieldErrors()) {
+//                errorMap.put("valid_" + error.getField(), error.getDefaultMessage());
+//                log.info("Error message : {}", error.getDefaultMessage());
+//            }
+//            // 회원 가입 페이지로 다시 리턴
+//            return "/home";
+//        }
 
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         user.setRoles("ROLE_USER");
@@ -116,7 +117,6 @@ public class UserController {
             return "/user/check";
         }
         userRepository.findByPhoneNumber(user.getPhoneNumber());
-        log.info("phoneNumber2={}", user.getPhoneNumber());
 
         return "사용 가능한 번호 입니다.";
     }
@@ -132,7 +132,7 @@ public class UserController {
 
         String [] tokens = token.split("\\.");
 
-        String payload = new String(Base64.getDecoder().decode(tokens[1]));
+        String payload = new String(Base64.getUrlDecoder().decode(tokens[1]));
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -204,7 +204,7 @@ public class UserController {
 
         String [] tokens = token.split("\\.");
 
-        String payload = new String(Base64.getDecoder().decode(tokens[1]));
+        String payload = new String(Base64.getUrlDecoder().decode(tokens[1]));
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -223,7 +223,7 @@ public class UserController {
 
         String [] tokens = token.split("\\.");
 
-        String payload = new String(Base64.getDecoder().decode(tokens[1]));
+        String payload = new String(Base64.getUrlDecoder().decode(tokens[1]));
 
         ObjectMapper mapper = new ObjectMapper();
 

@@ -1,5 +1,6 @@
 package com.hanait.noninvasiveglucosespring.validator;
 
+import com.hanait.noninvasiveglucosespring.model.Caregiver;
 import com.hanait.noninvasiveglucosespring.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.Errors;
@@ -26,4 +27,14 @@ public abstract class AbstractValidator<T> implements Validator {
     }
 
     public abstract void doValidate(User user, Errors errors);
+
+
+    public void CareValidate(Object target, Errors errors) {
+        try {
+            CareValidate((Caregiver) target, errors);
+        } catch (RuntimeException e) {
+            log.error("중복 검증 에러", e);
+            throw e;
+        }
+    }
 }
