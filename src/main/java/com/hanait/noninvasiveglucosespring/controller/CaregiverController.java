@@ -37,7 +37,7 @@ public class CaregiverController {
     }
 
     @PostMapping("/caregiver/check")
-    public String findPhoneNumber(@Validated @RequestPart("phoneNumber") String phoneNumber, Model model,
+    public String findPhoneNumber(@Validated @RequestBody String phoneNumber, Model model,
                                   BindingResult bindingResult, HttpServletResponse response) {
 
         response.setCharacterEncoding("utf-8");
