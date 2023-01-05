@@ -28,13 +28,4 @@ public abstract class AbstractValidator<T> implements Validator {
 
     public abstract void doValidate(User user, Errors errors);
 
-
-    public void CareValidate(Object target, Errors errors) {
-        try {
-            CareValidate((Caregiver) target, errors);
-        } catch (RuntimeException e) {
-            log.error("중복 검증 에러", e);
-            throw e;
-        }
-    }
 }

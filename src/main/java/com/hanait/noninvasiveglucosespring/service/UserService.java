@@ -32,8 +32,7 @@ public class UserService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     /* 아이디 중복 여부 확인 */
-    @Transactional(readOnly = true)
-    public boolean checkUsernameDuplication(String phoneNumber) {
+    public boolean checkPhoneNumberDuplication(String phoneNumber) {
         return userRepository.existsByPhoneNumber(phoneNumber);
     }
 

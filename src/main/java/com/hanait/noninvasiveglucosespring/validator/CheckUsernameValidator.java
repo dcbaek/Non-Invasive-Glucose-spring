@@ -22,9 +22,4 @@ public class CheckUsernameValidator extends AbstractValidator<User>{
         }
     }
 
-    public void CareValidate(Caregiver caregiver, Errors errors) {
-        if(caregiverRepository.existsByPhoneNumber(caregiver.getPhoneNumber())) {
-            errors.rejectValue("phoneNumber", "아이디 중복 오류", "이미 등록된 보호자 입니다.");
-        }
-    }
 }
