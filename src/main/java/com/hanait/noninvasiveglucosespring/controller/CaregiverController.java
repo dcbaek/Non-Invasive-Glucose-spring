@@ -1,5 +1,7 @@
 package com.hanait.noninvasiveglucosespring.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hanait.noninvasiveglucosespring.model.Caregiver;
 import com.hanait.noninvasiveglucosespring.model.User;
 import com.hanait.noninvasiveglucosespring.repository.CaregiverRepository;
@@ -8,17 +10,15 @@ import com.hanait.noninvasiveglucosespring.service.UserService;
 import com.hanait.noninvasiveglucosespring.validator.CheckUsernameValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.message.Message;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.constraints.Past;
-import java.util.HashMap;
+import java.io.DataInput;
+import java.io.IOException;
 import java.util.Map;
 
 @Slf4j
@@ -33,27 +33,38 @@ public class CaregiverController {
 
     private final CaregiverRepository caregiverRepository;
 
-    private final CheckUsernameValidator checkUsernameValidator;
-
-    @InitBinder
-    public void validatorBinder(WebDataBinder binder){
-        binder.addValidators(checkUsernameValidator);
-    }
-
     @PostMapping("/caregiver/join")
     public String joinUser(@RequestHeader(value = "Authorization", required = false) String token,
                            @RequestBody Caregiver caregiver, HttpServletResponse response) {
         response.setContentType("application/json");
 
         caregiverRepository.save(caregiver);
+        log.info("caregiver join");
 
         return "보호자추가";
     }
 
     @GetMapping("/caregiver/check/{phoneNumber}")
-    public ResponseEntity<Boolean> findPhoneNumber(@PathVariable String phoneNumber, HttpServletResponse response) {
+    public User findPhoneNumber(@RequestHeader("Authorization") String token, @PathVariable String phoneNumber,
+                                HttpServletResponse response) throws IOException {
 
-        return ResponseEntity.ok(userService.checkPhoneNumberDuplication(phoneNumber));
+        boolean user = userService.checkPhoneNumberDuplication(phoneNumber);
+
+        if (!user) {
+            response.setStatus(400);
+        } else {
+
+            response.setContentType("application/json");
+
+            User user1 = userRepository.findByPhoneNumber(phoneNumber);
+
+            log.info("caregiver info");
+
+            return userRepository.findByPhoneNumber(phoneNumber);
+
+        }
+
+        return null;
 
     }
 }

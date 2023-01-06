@@ -5,18 +5,21 @@ import lombok.ToString;
 import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Entity
 @DynamicUpdate
 public class Caregiver extends BaseTimeEntity{
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "caregiverId")
+    @Id @GeneratedValue
     private long id;
     private String phoneNumber;
-    private int userId;
+
+    @OneToMany(mappedBy = "caregiver")
+    @ToString.Exclude
+    private List<userCaregiver> userCaregivers = new ArrayList<>();
     /*
     1. 전화번호 사용자 조회
     2. 보호자 등록

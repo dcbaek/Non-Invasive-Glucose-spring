@@ -16,12 +16,10 @@ import java.util.List;
 @Data
 @Entity
 @DynamicUpdate
-@ToString(exclude = "caregiver")
 public class User extends BaseTimeEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "userId")
     private long id;
     private String phoneNumber;
     private String nickname;
@@ -32,11 +30,10 @@ public class User extends BaseTimeEntity{
 
     private String refreshToken;
 
-    @OneToMany
-    @JoinTable(name = "USER_CAREGIVER",
-            joinColumns = {@JoinColumn(name = "userId", referencedColumnName = "userId")},
-            inverseJoinColumns = {@JoinColumn(name = "caregiverId", referencedColumnName = "caregiverId")})
-    private List<Caregiver> caregiver = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user")
+    @ToString.Exclude
+    private List<userCaregiver> userCaregivers = new ArrayList<>();
 
     // ENUM으로 안하고 ,로 해서 구분해서 ROLE을 입력 -> 그걸 파싱!!
     public List<String> getRoleList() {
