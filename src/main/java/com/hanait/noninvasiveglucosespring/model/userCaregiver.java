@@ -8,7 +8,7 @@ import javax.persistence.*;
 @Entity
 public class userCaregiver {
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne

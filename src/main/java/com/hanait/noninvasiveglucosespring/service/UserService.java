@@ -18,10 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Base64;
-import java.util.Date;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -83,29 +80,31 @@ public class UserService {
 
     }
 
-//    public Map<String, String> refresh(String refreshToken) {
-//
-//        // Refresh Token 유효성 검사사
-//        JWTVerifier verifier = JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build();
-//        DecodedJWT decodedJWT = verifier.verify(refreshToken);
-//
-//        // Access Token 재발급
-//        long now = System.currentTimeMillis();
-//        String phoneNumber = decodedJWT.getSubject();
-//        User user = userRepository.findByPhoneNumber(phoneNumber);
-//
-//        if (!user.getRefreshToken().equals(refreshToken)) {
-//            throw new JWTVerificationException("유효하지 않은 Refresh Token 입니다.");
-//        }
-//
-//        String accessToken = JWT.create()
-//                .withSubject(user.getPhoneNumber())
-//                .withExpiresAt(new Date(now + JwtProperties.EXPIRATION_TIME))
-//                .withClaim("roles", user.getRoles())
-//                .sign(Algorithm.HMAC512(JwtProperties.SECRET));
-//
-//        return null;
-//    }
+    public Map<String, String> refresh(String refreshToken) {
+
+        // Refresh Token 유효성 검사사
+        JWTVerifier verifier = JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build();
+        DecodedJWT decodedJWT = verifier.verify(refreshToken);
+
+        // Access Token 재발급
+        long now = System.currentTimeMillis();
+        String phoneNumber = decodedJWT.getSubject();
+        User user = userRepository.findByPhoneNumber(phoneNumber);
+
+        if (!user.getRefreshToken().equals(refreshToken)) {
+            throw new JWTVerificationException("유효하지 않은 Refresh Token 입니다.");
+        }
+
+        String accessToken = JWT.create()
+                .withSubject(user.getPhoneNumber())
+                .withExpiresAt(new Date(now + JwtProperties.EXPIRATION_TIME))
+                .withClaim("roles", user.getRoles())
+                .sign(Algorithm.HMAC512(JwtProperties.SECRET));
+
+        Map<String, String> accessTokenResponseMap = new HashMap<>();
+
+        return null;
+    }
 
     @Transactional(readOnly = true)
     public User getUserInfo(String phoneNumber) {

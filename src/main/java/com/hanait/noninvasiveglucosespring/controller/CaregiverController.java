@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import java.io.DataInput;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -45,8 +46,7 @@ public class CaregiverController {
     }
 
     @GetMapping("/caregiver/check/{phoneNumber}")
-    public User findPhoneNumber(@RequestHeader("Authorization") String token, @PathVariable String phoneNumber,
-                                HttpServletResponse response) throws IOException {
+    public User findPhoneNumber(@PathVariable String phoneNumber, HttpServletResponse response) throws IOException {
 
         boolean user = userService.checkPhoneNumberDuplication(phoneNumber);
 
@@ -58,7 +58,7 @@ public class CaregiverController {
 
             User user1 = userRepository.findByPhoneNumber(phoneNumber);
 
-            log.info("caregiver info");
+            log.info("caregiver info = {}", user1);
 
             return userRepository.findByPhoneNumber(phoneNumber);
 
@@ -67,4 +67,18 @@ public class CaregiverController {
         return null;
 
     }
+
+    @PostMapping("/caregiver/checkList")
+    public List<User> checkList() {
+        return userRepository.findAll();
+    }
+
+    @PostMapping("/caregiver/delete")
+    public void caregiverDelete(User user) {
+
+        userRepository.delete(user);
+
+    }
 }
+
+

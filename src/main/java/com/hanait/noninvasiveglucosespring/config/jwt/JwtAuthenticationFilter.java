@@ -87,22 +87,19 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.EXPIRATION_TIME))
                 .withClaim("id", principalDetailis.getUser().getId())
                 .withClaim("phoneNumber", principalDetailis.getUsername())
-                .withClaim("nickname", principalDetailis.getUser().getNickname())
-                .withClaim("sex", principalDetailis.getUser().getSex())
-                .withClaim("birthDay", principalDetailis.getUser().getBirthDay())
-                .withClaim("createdDate", String.valueOf(principalDetailis.getUser().getCreatedDate()))
                 .sign(Algorithm.HMAC512(JwtProperties.SECRET));
 
-        String refreshToken = JWT.create()
-                .withClaim("phoneNumber", principalDetailis.getUsername())
-                .withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.REFRESH_EXPIRATION_TIME))
-                .withIssuedAt(new Date(System.currentTimeMillis()))
-                .sign(Algorithm.HMAC512(JwtProperties.SECRET));
+//        String refreshToken = JWT.create()
+//                .withSubject(principalDetailis.getUsername())
+//                .withClaim("phoneNumber", principalDetailis.getUsername())
+//                .withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.REFRESH_EXPIRATION_TIME))
+//                .withIssuedAt(new Date(System.currentTimeMillis()))
+//                .sign(Algorithm.HMAC512(JwtProperties.SECRET));
 
 
         response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX + jwtToken);
         //새롭게추가
-        //response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.REFRESH_TOKEN + refreshToken);
+//        response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.REFRESH_TOKEN + refreshToken);
     }
 
 }

@@ -1,6 +1,7 @@
 package com.hanait.noninvasiveglucosespring.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
@@ -23,7 +24,10 @@ public class User extends BaseTimeEntity{
     private long id;
     private String phoneNumber;
     private String nickname;
+
+    @JsonIgnore
     private String password;
+
     private String roles;
     private String birthDay;
     private String sex;
